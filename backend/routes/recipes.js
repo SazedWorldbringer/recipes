@@ -31,8 +31,15 @@ router.post('/', authenticateToken, async (req, res) => {
 })
 
 // PUT update recipe (like, edit, etc.)
-router.put('/:id', async (req, res) => {
+router.put('/:id', authenticateToken, async (req, res) => {
   try {
+    const recipe = await Recipe.findById(req.params.id)
+    if (!recipe) return res.status(404).json({ error: "Recipe not found" })
+
+    if (recipe.user.toString() !== req.user.id) {
+      return res.status(403).json({ error: 'Forbidden: You do not own this recipe' })
+    }
+
     const updated = await Recipe.findByIdAndUpdate(req.params.id, req.body, { new: true })
     res.json(updated)
   } catch (err) {
@@ -41,9 +48,21 @@ router.put('/:id', async (req, res) => {
 })
 
 // DELETE remove recipe
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authenticateToken, async (req, res) => {
   try {
+    const recipe = await Recipe.findById(req.params.id)
+    if (!recipe) return res.status(404).json({ error: "Recipe not found" })
+
+    if (recipe.user.toString() !== req.user.id) {
+      return res.status(403).json({ error: 'Forbidden: You do not own this recipe' })
+    }
+
     await Recipe.findByIdAndDelete(req.params.id)
+
+    const user = await User.findById(req.user.id)
+    user.postedRecipes = user.postedRecipes.filter(id => id.toString() !== req.params.id)
+    await user.save()
+
     res.status(204).end()
   } catch (err) {
     res.status(400).json({ error: err.message })
