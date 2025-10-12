@@ -3,7 +3,7 @@ import mongoose from 'mongoose'
 import cors from 'cors'
 import dotenv from 'dotenv'
 
-import recipeRoutes from './routes/recipe.js'
+import recipeRoutes from './routes/recipes.js'
 
 dotenv.config()
 
