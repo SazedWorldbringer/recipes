@@ -30,7 +30,7 @@ router.post('/', authenticateToken, async (req, res) => {
   }
 })
 
-// PUT update recipe (like, edit, etc.)
+// PUT update recipe
 router.put('/:id', authenticateToken, async (req, res) => {
   try {
     const recipe = await Recipe.findById(req.params.id)
@@ -42,6 +42,28 @@ router.put('/:id', authenticateToken, async (req, res) => {
 
     const updated = await Recipe.findByIdAndUpdate(req.params.id, req.body, { new: true })
     res.json(updated)
+  } catch (err) {
+    res.status(400).json({ error: err.message })
+  }
+})
+
+// PUT /api/recipes/:id/like
+router.put('/:id/like', authenticateToken, async (req, res) => {
+  try {
+    const recipe = await Recipe.findById(req.params.id)
+    if (!recipe) return res.status(404).json({ error: 'Recipe not found' })
+
+    const userId = req.user.id
+
+    if (recipe.likedBy.includes(userId)) {
+      return res.status(400).json({ error: 'You already liked this recipe' })
+    }
+
+    recipe.likedBy.push(userId)
+    recipe.likes = recipe.likedBy.length
+    const updatedRecipe = await recipe.save()
+
+    res.json(updatedRecipe)
   } catch (err) {
     res.status(400).json({ error: err.message })
   }
