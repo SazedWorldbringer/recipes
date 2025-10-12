@@ -4,6 +4,8 @@ import cors from 'cors'
 import dotenv from 'dotenv'
 
 import recipeRoutes from './routes/recipes.js'
+import userRoutes from './routes/users.js'
+import loginRoutes from './routes/login.js'
 
 dotenv.config()
 
@@ -13,6 +15,8 @@ app.use(cors())
 app.use(express.json())
 
 app.use('/api/recipes', recipeRoutes)
+app.use('/api/users', userRoutes)
+app.use('/api/login', loginRoutes)
 
 // mongodb connection
 const mongoURI = process.env.MONGO_URI
