@@ -9,6 +9,8 @@ const router = express.Router()
 // GET all recipes
 router.get('/', async (req, res) => {
   const recipes = await Recipe.find().sort({ createdAt: -1 })
+    .populate('user', 'username name')
+    .populate('likedBy', 'username name')
   res.json(recipes)
 })
 
