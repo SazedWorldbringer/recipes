@@ -3,12 +3,16 @@ import mongoose from 'mongoose'
 import cors from 'cors'
 import dotenv from 'dotenv'
 
+import recipeRoutes from './routes/recipe.js'
+
 dotenv.config()
 
 const app = express()
 
 app.use(cors())
 app.use(express.json())
+
+app.use('/api/recipes', recipeRoutes)
 
 // mongodb connection
 const mongoURI = process.env.MONGO_URI
