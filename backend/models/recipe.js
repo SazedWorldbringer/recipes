@@ -8,6 +8,7 @@ const recipeSchema = new mongoose.Schema({
   description: String,
   ingredients: [String],
   steps: [String],
+  imageUrl: String,
   likes: {
     type: Number,
     default: 0,

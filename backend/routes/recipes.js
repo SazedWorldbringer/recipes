@@ -16,10 +16,10 @@ router.get('/', async (req, res) => {
 
 // POST create new recipe
 router.post('/', authenticateToken, async (req, res) => {
-  const { title, description, ingredients, steps } = req.body
+  const { title, description, ingredients, steps, imageUrl } = req.body
 
   try {
-    const recipe = new Recipe({ title, description, ingredients, steps, user: req.user.id })
+    const recipe = new Recipe({ title, description, ingredients, steps, imageUrl, user: req.user.id })
     const savedRecipe = await recipe.save()
 
     const user = await User.findById(req.user.id)
