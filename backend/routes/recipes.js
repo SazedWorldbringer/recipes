@@ -32,6 +32,14 @@ router.post('/', authenticateToken, async (req, res) => {
   }
 })
 
+// GET recipe/:id
+router.get('/:id', async (req, res) => {
+  const recipe = await Recipe.findById(req.params.id)
+    .populate('user', 'username name')
+    .populate('likedBy', 'username name')
+  res.json(recipe)
+})
+
 // PUT update recipe
 router.put('/:id', authenticateToken, async (req, res) => {
   try {
