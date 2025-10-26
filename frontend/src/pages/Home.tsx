@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { Navbar } from "@/components/navbar"
 import { RecipeCard } from "@/components/recipe-card"
 import { api } from "@/api"
+import { useUser } from "@/context/UserContext"
 
 interface Recipe {
   _id: string
@@ -13,10 +14,13 @@ interface Recipe {
     username: string
     name?: string
   }
+  likedBy: string[]
+  savedBy: string[]
 }
 
 export default function HomePage() {
   const [recipes, setRecipes] = useState<Recipe[]>([])
+  const { user } = useUser()
 
   useEffect(() => {
     const fetchRecipes = async () => {
@@ -61,6 +65,8 @@ export default function HomePage() {
                   author={r.user.name || r.user.username}
                   imageUrl={r.imageUrl}
                   initialLikes={r.likes}
+                  initiallyLiked={user ? (r.likedBy || []).includes(user.username) : false}
+                  initiallySaved={user ? (r.savedBy || []).includes(user.username) : false}
                 />
               ))}
             </div>

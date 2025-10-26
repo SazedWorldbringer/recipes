@@ -1,10 +1,13 @@
+"use client"
+
 import { useMemo, useState } from "react"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "./ui/card.tsx"
-import { Button } from "./ui/button"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card.tsx"
+import { Button } from "@/components/ui/button"
 import { Heart, Bookmark } from "lucide-react"
-import { cn } from "../lib/utils"
-import { api } from "../api"
-import { useUser } from "../context/UserContext"
+import { cn } from "@/lib/utils"
+import { api } from "@/api"
+import { useUser } from "@/context/UserContext"
+import { Link } from "react-router-dom"
 
 export interface RecipeCardProps {
   id: string
@@ -14,6 +17,7 @@ export interface RecipeCardProps {
   imageUrl?: string
   initialLikes?: number
   initiallySaved?: boolean
+  initiallyLiked?: boolean
 }
 
 export function RecipeCard({
@@ -33,42 +37,49 @@ export function RecipeCard({
   const imgSrc = useMemo(() => imageUrl || "/plated-home-cooked-meal.jpg", [imageUrl])
 
   const toggleLike = async () => {
-    if (!user) return
+    if (!user) return alert("Please log in to like recipes.")
     try {
       await api.put(`/recipes/${id}/like`)
       setLiked(prev => !prev)
       setLikes(prev => (liked ? prev - 1 : prev + 1))
     } catch (err) {
-      console.error(err)
+      alert(err || "Failed to like recipe.")
     }
   }
 
   const toggleSave = async () => {
-    if (!user) return
+    if (!user) return alert("Please log in to save recipes.")
     try {
-      await api.post(`/users/save/${id}`)
-      setSaved(prev => !prev)
-    } catch (err) {
-      console.error(err)
+      if (saved) {
+        await api.delete(`/users/save/${id}`)
+        setSaved(false)
+      } else {
+        await api.post(`/users/save/${id}`)
+        setSaved(true)
+      }
+    } catch (err: any) {
+      alert(err || "Failed to save recipe.")
     }
   }
 
   return (
     <Card className="overflow-hidden">
-      <CardHeader className="p-0">
-        <div className="relative h-48 w-full bg-muted">
-          <img
-            src={imgSrc}
-            alt={`Photo of ${title}`}
-            className="object-cover w-full h-full"
-          />
-        </div>
-      </CardHeader>
-      <CardContent className="p-4">
-        <CardTitle className="text-lg font-bold">{title}</CardTitle>
-        <p className="mt-1 text-sm text-gray-500">by {author}</p>
-        <p className="mt-2 text-sm text-gray-700">{description}</p>
-      </CardContent>
+      <Link to={`/recipes/${id}`} className="block">
+        <CardHeader className="p-0">
+          <div className="relative h-48 w-full bg-muted">
+            <img
+              src={imgSrc}
+              alt={`Photo of ${title}`}
+              className="object-cover w-full h-full"
+            />
+          </div>
+        </CardHeader>
+        <CardContent className="p-4">
+          <CardTitle className="text-lg font-bold">{title}</CardTitle>
+          <p className="mt-1 text-sm text-gray-500">by {author}</p>
+          <p className="mt-2 text-sm text-gray-700">{description}</p>
+        </CardContent>
+      </Link>
       <CardFooter className="p-4 pt-0 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Button
@@ -91,7 +102,6 @@ export function RecipeCard({
             <span className="text-sm">{saved ? "Saved" : "Save"}</span>
           </Button>
         </div>
-        <span className="text-xs text-gray-400">ID: {id}</span>
       </CardFooter>
     </Card>
   )

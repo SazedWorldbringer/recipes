@@ -3,13 +3,19 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { useState } from "react"
-import { api } from "@/api"
+import { useState, useEffect } from "react"
+import { api, setToken } from "@/api"
 import { useNavigate } from "react-router-dom"
+import { useUser } from "@/context/UserContext"
 
 export function LoginForm({ className, ...props }: React.ComponentProps<"div">) {
   const navigate = useNavigate()
   const [error, setError] = useState("")
+  const { user, loginUser } = useUser()
+
+  useEffect(() => {
+    if (user) navigate("/")
+  }, [user, navigate])
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -19,8 +25,13 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
 
     try {
       const res = await api.post("/login", { username, password })
+
+      setToken(res.data.token)
       localStorage.setItem("token", res.data.token)
-      navigate("/") // redirect to homepage after login
+
+      loginUser({ username: res.data.username, name: res.data.name }, res.data.token)
+
+      navigate("/")
     } catch (err: any) {
       setError(err.response?.data?.error || "Login failed")
     }
@@ -35,7 +46,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
               <div className="flex flex-col items-center gap-2 text-center">
                 <h1 className="text-2xl font-bold">Welcome back</h1>
                 <p className="text-muted-foreground text-balance">
-                  Login to your Recipes! account
+                  Login to your ReciShare account
                 </p>
               </div>
 
